@@ -52,6 +52,19 @@ const server = serve({
 	routes: {
 		// Home page - create snippet form
 		"/": index,
+		// Serve static assets
+		"/assets/*": {
+			async GET(req) {
+				const url = new URL(req.url);
+				const filePath = `src${url.pathname}`;
+				try {
+					return new Response(Bun.file(filePath));
+				} catch (error) {
+					console.log(error);
+					return new Response("Not Found", { status: 404 });
+				}
+			},
+		},
 		// Get subscription feeds
 		"/feeds": {
 			async GET(request: Request) {
