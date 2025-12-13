@@ -25,11 +25,8 @@ COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /usr/src/app/src ./src
 COPY --from=prerelease /usr/src/app/package.json .
 
-# Create directory for SQLite database
-RUN mkdir -p /usr/src/app/data
-
 # Expose port
-EXPOSE 3000/tcp
+EXPOSE 4555/tcp
 
 # Run the app
 ENTRYPOINT [ "bun", "start" ]
