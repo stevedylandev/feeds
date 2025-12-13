@@ -1,6 +1,6 @@
 # Feeds
 
-![cover](https://sipp.so/assets/og.png)
+![cover](https://feeds.stevedylan.dev/assets/og.png)
 
 Minimal RSS Feeds
 
