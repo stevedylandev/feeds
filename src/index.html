@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>FEEDS</title>
+   	<meta name="description" content="Minimal RSS">
+  </head>
+  <body>
+    <a href="/" class="header">
+      <h1>FEEDS</h1>
+    </a>
+
+    <div class="links">
+      <a target="_blank" href="https://github.com/stevedylandev/Feeds">
+        GitHub
+      </a>
+      <p>by <a target="_blank" href="https://stevedylan.dev">Steve</a></p>
+    </div>
+
+    <div id="loading" style="display: none;">
+      <p>Loading feeds...</p>
+    </div>
+
+    <div id="error" style="display: none; color: #ff6b6b;">
+      <p>Error loading feeds. Please try again later.</p>
+    </div>
+
+    <div id="feeds-container">
+      <!-- Feeds will be populated here -->
+    </div>
+
+
+    <script>
+
+    async function loadFeeds() {
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const container = document.getElementById('feeds-container');
+
+      // Show loading state
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      container.innerHTML = '';
+
+      try {
+        const response = await fetch('/api/list');
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch feeds');
+        }
+
+        // Hide loading
+        loading.style.display = 'none';
+
+        if (!data.items || data.items.length === 0) {
+          container.innerHTML = '<p class="no-feeds">No feeds available</p>';
+          return;
+        }
+
+        // Create feeds list
+        const feedsList = document.createElement('div');
+        feedsList.className = 'feeds-list';
+
+        // Sort items by published date (newest first)
+        const sortedItems = data.items.sort((a, b) => b.published - a.published);
+
+        sortedItems.forEach(item => {
+          const feedItem = document.createElement('article');
+          feedItem.className = 'feed-item';
+
+          // Format date
+          const publishedDate = new Date(item.published * 1000);
+          const formattedDate = publishedDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+
+          feedItem.innerHTML = `
+            <div class="feed-meta">
+              <span class="feed-source">${item.origin?.title || 'Unknown Source'}</span>
+              <span class="feed-date">${formattedDate}</span>
+            </div>
+            <h3 class="feed-title">
+              <a href="${item.link}" target="_blank" rel="noopener noreferrer">
+                ${item.title}
+              </a>
+            </h3>
+            ${item.author ? `<p class="feed-author">by ${item.author}</p>` : ''}
+          `;
+
+          feedsList.appendChild(feedItem);
+        });
+
+        container.appendChild(feedsList);
+
+      } catch (err) {
+        console.error('Error loading feeds:', err);
+        loading.style.display = 'none';
+        error.style.display = 'block';
+      }
+    }
+
+    // Load feeds when page loads
+    document.addEventListener('DOMContentLoaded', loadFeeds);
+    </script>
+  </body>
+</html>
