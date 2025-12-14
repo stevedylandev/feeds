@@ -47,6 +47,7 @@ body {
 	flex-direction: column;
 	gap: 0.5rem;
 	font-size: 14px;
+	line-height: 1.25rem;
 }
 
 button {
@@ -61,6 +62,19 @@ button {
 a {
 	background: #121113;
 	color: #ffffff;
+}
+
+ul {
+	margin-left: 1.5rem;
+}
+
+li {
+	padding: 0.5rem 0;
+}
+
+code {
+	background: #333;
+	padding: 3px;
 }
 
 .feeds-list {

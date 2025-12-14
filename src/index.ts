@@ -1,5 +1,6 @@
 import { serve } from "bun";
 import index from "./index.html";
+import about from "./about.html";
 import type { SubscriptionList, FreshRSSResponse, Feed } from "./types";
 import { parse, parseOpmlFile } from "./utils";
 
@@ -11,6 +12,7 @@ const server = serve({
 	routes: {
 		// Home page - create snippet form
 		"/": index,
+		"/about": about,
 		// Serve static assets
 		"/assets/*": {
 			async GET(req) {

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./styles.css" />
+    <meta name="theme-color" content="#121113" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://feeds.software/assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://feeds.software/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://feeds.software/assets/favicon-16x16.png">
+    <link rel="manifest" href="https://feeds.software/assets/site.webmanifest">
+
+    <title>Feeds | About</title>
+   	<meta name="description" content="Minimal Code Sharing">
+
+    <meta property="og:url" content="https://feeds.software">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Feeds | About">
+    <meta property="og:description" content="Minimal RSS Reader">
+    <meta property="og:image" content="https://feeds.software/assets/og.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:domain" content="feeds.software">
+    <meta property="twitter:url" content="https://feeds.software">
+    <meta name="twitter:title" content="Feeds | About">
+    <meta name="twitter:description" content="Minimal RSS Reader">
+    <meta name="twitter:image" content="https://feeds.software/assets/og.png">
+
+  </head>
+  <body>
+    <a href="/" class="header">
+      <h1>FEEDS</h1>
+    </a>
+    <div class="links">
+      <a href="/">Go Back</a>
+      <a target="_blank" href="https://github.com/stevedylandev/sipp">
+        GitHub
+      </a>
+      <p>by <a target="_blank" href="https://stevedylan.dev">Steve</a></p>
+    </div>
+
+    <div class="about">
+      <p>Feeds is designed to be a minimal RSS reader that lets you consume content in its original context. Most RSS readers will have their own content renderer for convenience sake, and there's nothing inheritly wrong with that. However, you do miss out on the web experience that the original author has crafted through their personal website. I built this small self-hosted tool for myself as I simply wanted to have a list of posts from my subscriptions. There is no categories, marking posts read or unread, just links.</p>
+      <p>I've built this tool to be self hosted and hackable. All the code is opened sourced and the <a href="https://github.com/stevedylandev/feeds" target="_blank" rel="noreferrer">GitHub README</a> will have instructions on how to do that. You can change the theme, add or remove features, and just make it your own! The logic flow for sourcing RSS feeds is as follows:</p>
+      <ul>
+        <li>URL Query Param - Adding <code>?url=https://somefeed.com/index.xml</code> to the URL will fetch that content first</li>
+        <li>Local OPML File - If self hosting you can put a <code>feeds.opml</code> file in the root project directory and it will source it automatically</li>
+        <li>FreshRSS API - If neither of the above are set then it will default to the FreshRSS environment variables set</li>
+      </ul>
+      <p>The core logic for fetchig content is in <code>src/utils.ts</code> where it uses <a href="https://feedsmith.dev" target="_blank" rel="noreferrer">feedsmith</a> to turn an array of RSS feed URLs into a list of posts. This makes it relatively simple and easy to find new ways to add feeds, such as simply adding a list of feeds directly into the API route in <code>src/index.ts</code>.</p>
+      <p>If you have any questions freel free to <a href="mailto:contact@stevedylan.dev?subject=Feeds">reach out</a>!</p>
+    </div>
+  </body>
+</html>
