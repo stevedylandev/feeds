@@ -6,7 +6,50 @@ Minimal RSS Feeds
 
 ## About
 
-TBD
+Feeds is a minimal RSS reader that mimics the original experience of RSS. It's just a list of posts. No categories, no marking a post read or unread, and there is no in-app reading. With this approach you have to read the post on the authors personal website and experience it in it's original context. While this may not work well if you have loads of news feeds, I personally love it for [my approach to blogs](https://blogfeeds.net).
+
+This app is also MIT open sourced and designed to be self-hosted; fork the code and change it to your liking!
+
+## Usage
+
+I've built some core logic in `src/utils.ts` where the `parse()` function can take an array of RSS feeds and render them as a list of posts that the `index.html` can render. Thanks to this flexibility there are several built in ways to source RSS feeds. 
+
+### URL Query Param
+
+Once you have the app running you can add the following to the URL to source an RSS feed:
+
+```
+?url=https://bearblog.dev/discover/feed/
+```
+
+You can also add multiple URLs by using commas to separate them:
+
+```
+?urls=https://bearblog.dev/discover/feed/,https://bearblog.stevedylan.dev/feed/
+```
+
+> [!TIP]
+> You can comment out this functionality inside `index.html` if you want to limit usage to just your selected feeds, or even hardcode an array of feeds.
+
+### OPML File
+
+If you save a `feeds.opml` file in the root of the project the app will automatically source it and fetch the posts for the feeds inside. 
+
+### FreshRSS API
+
+If neither of the above are provided the app will default to using a FreshRSS API instance. Simply run the following command:
+
+```bash
+cp .env.sample .env
+```
+
+Then fill in the environment variables:
+
+```
+FRESHRSS_URL=
+FRESHRSS_USERNAME=
+FRESHRSS_PASSWORD=
+```
 
 ## Quickstart
 
@@ -34,17 +77,7 @@ bun dev
 ## Project Structure
 
 ```
-sipp/
-├── src/
-│   ├── index.ts          # Main server file with routes and API endpoints
-│   ├── db.ts             # SQLite database operations and schema
-│   ├── index.html        # Home page with snippet creation form
-│   ├── snippet.html      # Snippet viewing page with copy functionality
-│   ├── styles.css        # Minimal CSS styling with custom fonts
-│   └── assets/
-│       ├── site.webmanifest    # Web app manifest
-│       └── fonts/              # Custom Commit Mono font files
-└── sipp.sqlite          # SQLite database (created automatically)
+TBD
 ```
 
 The architecture is intentionally simple:
@@ -72,7 +105,7 @@ bun install
 
 2. Create a systemd service
 
-The location of where these files are located might depend on your linux distribution, but most commonly they can be found at `/etc/systemd/system`. Create a new file called `sipp.service` and edit it with `nano` or `vim`.
+The location of where these files are located might depend on your linux distribution, but most commonly they can be found at `/etc/systemd/system`. Create a new file called `feeds.service` and edit it with `nano` or `vim`.
 
 ```bash
 cd /etc/systemd/service
@@ -110,7 +143,7 @@ WantedBy=multi-user.target
 ```
 
 > [!NOTE]
-> Make sure you update the `YOUR_USER` with your own user info, and make sure the paths to `bun` and the `sipp` directory are correct!
+> Make sure you update the `YOUR_USER` with your own user info, and make sure the paths to `bun` and the `feeds` directory are correct!
 
 3. Start up the service
 
