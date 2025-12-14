@@ -47,7 +47,7 @@ async function fetchFeedWithTimeout(
 				published: Math.floor(
 					new Date(item.published || item.updated || "").getTime() / 1000,
 				),
-				author: item.authors?.[0]?.name || "",
+				author: atomFeed.title || "",
 				link: item.links?.[0]?.href || "",
 				origin: atomFeed.title || "",
 			}));
@@ -57,7 +57,7 @@ async function fetchFeedWithTimeout(
 				id: item.guid?.value || item.link || "",
 				title: item.title || "",
 				published: Math.floor(new Date(item.pubDate || "").getTime() / 1000),
-				author: item.authors?.[0] || item.dc?.creator || "",
+				author: rssFeed.title || "",
 				link: item.link || "",
 				origin: rssFeed.title || "",
 			}));
