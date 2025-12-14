@@ -43,6 +43,9 @@
       <p>Loading feeds...</p>
     </div>
 
+    <div id="feed-urls" style="display: none;">
+    </div>
+
     <div id="error" style="display: none; color: #ff6b6b;">
       <p>Error loading feeds. Please try again later.</p>
     </div>
@@ -58,6 +61,7 @@
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
       const container = document.getElementById('feeds-container');
+      const feedUrls = document.getElementById('feed-urls');
 
       // Show loading state
       loading.style.display = 'block';
@@ -66,14 +70,20 @@
 
       try {
         const urlParams = new URLSearchParams(window.location.search);
+        // Dynamic URL fetching
         const urlParam = urlParams.get('url');
         const urlsParam = urlParams.get('urls');
+
+        // Manual setting
+        // const urlParam = "https://bearblog.dev/discover/feed/"
 
         let apiUrl = '/api/list';
 
         if (urlParam || urlsParam) {
           const feedUrlString = urlParam || urlsParam;
           apiUrl += `?url=${encodeURIComponent(feedUrlString)}`;
+          feedUrls.style = "display: block;"
+          feedUrls.innerHTML = `${(urlParam || urlsParam).split(',').join('<br>')}`
         }
 
         const response = await fetch(apiUrl);

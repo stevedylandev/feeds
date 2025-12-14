@@ -1,7 +1,7 @@
 import { serve } from "bun";
 import index from "./index.html";
 import type { SubscriptionList, FreshRSSResponse, Feed } from "./types";
-import { parse } from "./utils";
+import { parse, parseOpmlFile } from "./utils";
 
 const FRESHRSS_URL = process.env.FRESHRSS_URL;
 const FRESHRSS_USERNAME = process.env.FRESHRSS_USERNAME;
@@ -136,6 +136,8 @@ const server = serve({
 		"/api/list": {
 			async GET(request: Request) {
 				try {
+					// Check for url queries
+					// e.g. ?url=https://bearblog.dev/discover/feed/,https://bearblog.stevedylan.dev
 					const url = new URL(request.url);
 					const urlQuery = url.searchParams.get("url");
 
@@ -151,6 +153,29 @@ const server = serve({
 							items: filteredItems,
 						});
 					}
+
+					// Check for local OPML File
+					// Will be slow if there is a lot of feeds
+					const file = Bun.file("feeds.opml");
+					const fileExists = await file.exists();
+					if (fileExists) {
+						const content = await file.text();
+						const urls = parseOpmlFile(content);
+						if (urls.length === 0) {
+							return Response.json(
+								{
+									error: "No Feeds found in opml file",
+								},
+								{ status: 400 },
+							);
+						}
+						const filteredItems = await parse(urls);
+						return Response.json({
+							items: filteredItems,
+						});
+					}
+
+					// Fallback to FreshRSS Instance
 					const authResponse = await fetch(
 						`${FRESHRSS_URL}/api/greader.php/accounts/ClientLogin?Email=${FRESHRSS_USERNAME}&Passwd=${FRESHRSS_API_PASSWORD}`,
 					);

@@ -78,6 +78,11 @@ a {
 	border-bottom: 1px solid #333;
 }
 
+#feed-urls {
+	font-size: 12px;
+	color: #888;
+}
+
 .feed-item:last-child {
 	border-bottom: none;
 }
