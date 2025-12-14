@@ -101,7 +101,7 @@ const server = serve({
 							id: item.id,
 							title: item.title,
 							published: item.published,
-							author: item.author,
+							author: item.origin.title,
 							link: item.canonical?.[0]?.href,
 							origin: item.origin,
 						})) || [];
