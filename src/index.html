@@ -65,7 +65,18 @@
       container.innerHTML = '';
 
       try {
-        const response = await fetch('/api/list');
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlParam = urlParams.get('url');
+        const urlsParam = urlParams.get('urls');
+
+        let apiUrl = '/api/list';
+
+        if (urlParam || urlsParam) {
+          const feedUrlString = urlParam || urlsParam;
+          apiUrl += `?url=${encodeURIComponent(feedUrlString)}`;
+        }
+
+        const response = await fetch(apiUrl);
         const data = await response.json();
 
         if (!response.ok) {

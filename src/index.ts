@@ -1,52 +1,11 @@
 import { serve } from "bun";
 import index from "./index.html";
+import type { SubscriptionList, FreshRSSResponse, Feed } from "./types";
+import { parse } from "./utils";
 
 const FRESHRSS_URL = process.env.FRESHRSS_URL;
 const FRESHRSS_USERNAME = process.env.FRESHRSS_USERNAME;
 const FRESHRSS_API_PASSWORD = process.env.FRESHRSS_PASSWORD;
-
-export type FeedItem = {
-	id: string;
-	crawlTimeMsec: string;
-	timestampUsec: string;
-	published: number;
-	title: string;
-	canonical: Array<{
-		href: string;
-	}>;
-	alternate: Array<{
-		href: string;
-	}>;
-	categories: string[];
-	origin: {
-		streamId: string;
-		htmlUrl: string;
-		title: string;
-	};
-	summary: {
-		content: string;
-	};
-	author: string;
-};
-
-type FreshRSSResponse = {
-	id: string;
-	updated: number;
-	items: FeedItem[];
-	continuation: string;
-};
-
-type Feed = {
-	id: string;
-	title: string;
-	url: string;
-	htmlUrl?: string;
-	iconUrl?: string;
-};
-
-type SubscriptionList = {
-	subscriptions?: Feed[];
-};
 
 const server = serve({
 	routes: {
@@ -175,8 +134,23 @@ const server = serve({
 		},
 		// Fetch a snippet
 		"/api/list": {
-			async GET() {
+			async GET(request: Request) {
 				try {
+					const url = new URL(request.url);
+					const urlQuery = url.searchParams.get("url");
+
+					if (urlQuery) {
+						// Split by comma and clean up the URLs
+						const urls = urlQuery
+							.split(",")
+							.map((u) => u.trim())
+							.filter(Boolean); // Remove empty strings
+
+						const filteredItems = await parse(urls);
+						return Response.json({
+							items: filteredItems,
+						});
+					}
 					const authResponse = await fetch(
 						`${FRESHRSS_URL}/api/greader.php/accounts/ClientLogin?Email=${FRESHRSS_USERNAME}&Passwd=${FRESHRSS_API_PASSWORD}`,
 					);
