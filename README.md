@@ -77,15 +77,24 @@ bun dev
 ## Project Structure
 
 ```
-TBD
+src/
+├── index.ts           # Bun HTTP server with routing and API endpoints
+├── types.ts           # TypeScript type definitions
+├── utils.ts           # Feed parsing utilities with parallel fetching
+├── index.html         # Main UI with inline JavaScript
+├── about.html         # About page
+├── styles.css         # Dark mode styling with custom fonts
+└── assets/
+    └── fonts/         # Commit Mono font files (.otf)
 ```
 
 The architecture is intentionally simple:
-- **`index.ts`** - Bun server with file-based routing and JSON API
-- **`db.ts`** - Direct SQLite operations with no ORM dependencies
+- **`index.ts`** - Bun server with three routes: home page, static assets, and `/api/list` endpoint
+- **`types.ts`** - Shared TypeScript types for FeedItem, FreshRSS responses, and subscriptions
+- **`utils.ts`** - Core feed parsing logic with parallel fetching and timeout handling
 - **HTML files** - Plain HTML with inline JavaScript, no build step required
-- **`styles.css`** - Single CSS file with custom font loading
-- **SQLite database** - File-based storage for maximum portability
+- **`styles.css`** - Single CSS file with dark mode theme and custom Commit Mono font
+- **OPML support** - Reads `feeds.opml` from root for subscription management
 
 ## Deployment
 

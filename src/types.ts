@@ -1,5 +1,14 @@
 export type FeedItem = {
 	id: string;
+	title: string;
+	published: number;
+	author: string;
+	link: string;
+	origin: string;
+};
+
+export type FreshRSSFeedItem = {
+	id: string;
 	crawlTimeMsec: string;
 	timestampUsec: string;
 	published: number;
@@ -25,7 +34,7 @@ export type FeedItem = {
 export type FreshRSSResponse = {
 	id: string;
 	updated: number;
-	items: FeedItem[];
+	items: FreshRSSFeedItem[];
 	continuation: string;
 };
 

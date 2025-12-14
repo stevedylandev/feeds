@@ -26,7 +26,7 @@ COPY --from=prerelease /usr/src/app/src ./src
 COPY --from=prerelease /usr/src/app/package.json .
 
 # Expose port
-EXPOSE 4555/tcp
+EXPOSE 3000/tcp
 
 # Run the app
 ENTRYPOINT [ "bun", "start" ]

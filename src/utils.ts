@@ -1,14 +1,6 @@
 import { parseFeed, parseOpml } from "feedsmith";
 import type { Rss, Atom } from "feedsmith/types";
-
-type FeedItem = {
-	id: string;
-	title: string;
-	published: number;
-	author: string;
-	link: string;
-	origin: string;
-};
+import type { FeedItem } from "./types";
 
 export function parseOpmlFile(opmlContent: string) {
 	const opml = parseOpml(opmlContent);
