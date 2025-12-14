@@ -1,6 +1,6 @@
 # Feeds
 
-![cover](https://feeds.stevedylan.dev/assets/og.png)
+![cover](https://feeds.software/assets/og.png)
 
 Minimal RSS Feeds
 
