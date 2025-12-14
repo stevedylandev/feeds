@@ -22,11 +22,18 @@ export function parseOpmlFile(opmlContent: string) {
 	return urls;
 }
 
-export async function parse(urls: string[]): Promise<FeedItem[]> {
-	const filteredItems: FeedItem[] = [];
+// Helper function to fetch a single feed with timeout
+async function fetchFeedWithTimeout(
+	url: string,
+	timeoutMs = 5000,
+): Promise<FeedItem[]> {
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-	for (const url of urls) {
-		const feedResponse = await fetch(url);
+	try {
+		const feedResponse = await fetch(url, { signal: controller.signal });
+		clearTimeout(timeoutId);
+
 		const feedContent = await feedResponse.text();
 		const { format, feed } = parseFeed(feedContent);
 
@@ -56,7 +63,26 @@ export async function parse(urls: string[]): Promise<FeedItem[]> {
 			}));
 		}
 
-		filteredItems.push(...items);
+		return items;
+	} catch (error) {
+		clearTimeout(timeoutId);
+		console.error(`Failed to fetch feed ${url}:`, error);
+		return [];
+	}
+}
+
+export async function parse(urls: string[]): Promise<FeedItem[]> {
+	// Fetch all feeds in parallel using Promise.allSettled
+	const results = await Promise.allSettled(
+		urls.map((url) => fetchFeedWithTimeout(url)),
+	);
+
+	// Combine all successful results
+	const filteredItems: FeedItem[] = [];
+	for (const result of results) {
+		if (result.status === "fulfilled") {
+			filteredItems.push(...result.value);
+		}
 	}
 
 	return filteredItems;
