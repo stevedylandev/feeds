@@ -47,7 +47,6 @@ const server = serve({
 					}
 
 					// Check for local OPML File
-					// Will be slow if there is a lot of feeds
 					const file = Bun.file("feeds.opml");
 					const fileExists = await file.exists();
 					if (fileExists) {
