@@ -284,52 +284,89 @@ func discoverFeeds(ctx context.Context, baseURL string) ([]string, error) {
 		return nil, fmt.Errorf("invalid URL: %w", err)
 	}
 	client := buildHTTPClient()
-	req, err := newRequest(ctx, http.MethodGet, baseURL)
-	if err != nil {
-		return nil, fmt.Errorf("invalid URL: %w", err)
+
+	// Pages to scan for <link rel="alternate"> feed hints. Always include the
+	// origin root: a user often pastes a deep or dead feed URL (e.g. an
+	// advertised /rss.xml that 404s) while the real feed is advertised on the
+	// homepage.
+	scanPages := []string{baseURL}
+	if root := originRoot(parsed); root != "" && root != baseURL {
+		scanPages = append(scanPages, root)
 	}
-	feeds := []string{}
-	resp, err := client.Do(req)
-	if err == nil {
-		defer resp.Body.Close()
+
+	candidates := []string{}
+	addCandidate := func(u string) {
+		if u != "" && !slices.Contains(candidates, u) {
+			candidates = append(candidates, u)
+		}
+	}
+	for _, page := range scanPages {
+		req, err := newRequest(ctx, http.MethodGet, page)
+		if err != nil {
+			continue
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			continue
+		}
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
-		links := findAlternateFeedLinks(string(body))
-		for _, href := range links {
+		_ = resp.Body.Close()
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			continue
+		}
+		for _, href := range findAlternateFeedLinks(string(body)) {
 			resolved := href
 			if u, err := parsed.Parse(href); err == nil {
 				resolved = u.String()
 			}
-			if !slices.Contains(feeds, resolved) {
-				feeds = append(feeds, resolved)
+			addCandidate(resolved)
+		}
+	}
+
+	// Fall back to well-known feed paths only when the pages advertised none.
+	if len(candidates) == 0 {
+		paths := []string{"/feed", "/feed.xml", "/rss", "/rss.xml", "/atom.xml", "/index.xml", "/feed/rss", "/blog/feed", "/blog/rss"}
+		for _, path := range paths {
+			if probe, err := parsed.Parse(path); err == nil {
+				addCandidate(probe.String())
 			}
 		}
 	}
-	if len(feeds) == 0 {
-		paths := []string{"/feed", "/feed.xml", "/rss", "/rss.xml", "/atom.xml", "/index.xml", "/feed/rss", "/blog/feed", "/blog/rss"}
-		for _, path := range paths {
-			probe, err := parsed.Parse(path)
-			if err != nil {
-				continue
+
+	// A candidate is only a feed if it actually parses. Content-type is
+	// unreliable — many valid feeds serve text/html or send no type at all.
+	// Validate concurrently to keep discovery fast.
+	valid := make([]bool, len(candidates))
+	var wg sync.WaitGroup
+	for i, c := range candidates {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := fetchFeed(ctx, c, "", ""); err == nil {
+				valid[i] = true
 			}
-			req, err := newRequest(ctx, http.MethodHead, probe.String())
-			if err != nil {
-				continue
-			}
-			resp, err := client.Do(req)
-			if err != nil {
-				continue
-			}
-			_ = resp.Body.Close()
-			ct := strings.ToLower(resp.Header.Get("Content-Type"))
-			if resp.StatusCode >= 200 && resp.StatusCode < 300 && (strings.Contains(ct, "xml") || strings.Contains(ct, "rss") || strings.Contains(ct, "atom")) {
-				feeds = append(feeds, probe.String())
-			}
+		}()
+	}
+	wg.Wait()
+
+	feeds := []string{}
+	for i, c := range candidates {
+		if valid[i] {
+			feeds = append(feeds, c)
 		}
 	}
 	if len(feeds) == 0 {
 		return nil, errors.New("no feeds found at this URL")
 	}
 	return feeds, nil
+}
+
+// originRoot returns the scheme://host/ root for a parsed URL.
+func originRoot(u *url.URL) string {
+	if u == nil || u.Scheme == "" || u.Host == "" {
+		return ""
+	}
+	return u.Scheme + "://" + u.Host + "/"
 }
 
 func findAlternateFeedLinks(doc string) []string {
