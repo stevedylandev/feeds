@@ -169,7 +169,7 @@ func htmlToText(src string) string {
 	return html.UnescapeString(b.String())
 }
 
-func previewURLs(ctx context.Context, urls []string, perFeed int, log *slog.Logger) ([]FeedPreviewItem, map[string]string) {
+func previewURLs(ctx context.Context, urls []string, perFeed int, cache *feedCache, log *slog.Logger) ([]FeedPreviewItem, map[string]string) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	items := []FeedPreviewItem{}
@@ -182,7 +182,7 @@ func previewURLs(ctx context.Context, urls []string, perFeed int, log *slog.Logg
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			res, err := fetchFeed(ctx, feedURL, "", "")
+			res, err := cache.fetch(ctx, feedURL)
 			if err != nil {
 				log.Warn("preview fetch failed", "url", feedURL, "err", err)
 				return

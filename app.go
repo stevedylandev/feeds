@@ -19,6 +19,9 @@ type App struct {
 	Log       *slog.Logger
 	Templates *template.Template
 	BaseURL   string
+	Cache     *feedCache
+	Images    *imageCache
+	renderSem chan struct{}
 }
 
 type templateItem struct {
@@ -36,11 +39,13 @@ type indexPageData struct {
 	MetaTitle       string
 	MetaDescription string
 	CanonicalURL    string
+	OGImage         string
 }
 
 func (a *App) routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", a.indexHandler)
+	mux.HandleFunc("GET /og.png", a.ogImageHandler)
 	mux.HandleFunc("GET /api/resolve", a.resolveHandler)
 	mux.HandleFunc("GET /static/", embeddedHandler(appFS, "static"))
 	return mux

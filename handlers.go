@@ -13,35 +13,26 @@ import (
 const maxFeedURLs = 20
 
 func (a *App) indexHandler(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query().Get("url")
-	if query == "" {
-		query = r.URL.Query().Get("urls")
-	}
 	data := indexPageData{
 		BaseURL:         a.BaseURL,
 		MetaTitle:       "Feeds",
 		MetaDescription: "Experience RSS feeds",
 		CanonicalURL:    a.BaseURL,
-	}
-	if query == "" {
-		render(a.Templates, w, "index.html", data, a.Log)
-		return
+		OGImage:         a.BaseURL + "/static/og.png",
 	}
 
-	urls := splitAndTrim(query)
+	urls := feedURLsFromRequest(r)
 	if len(urls) == 0 {
 		render(a.Templates, w, "index.html", data, a.Log)
 		return
 	}
-	if len(urls) > maxFeedURLs {
-		urls = urls[:maxFeedURLs]
-	}
 	data.FeedURLs = urls
 	data.CanonicalURL = a.BaseURL + r.URL.RequestURI()
+	data.OGImage = a.BaseURL + "/og.png?" + r.URL.RawQuery
 
 	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 	defer cancel()
-	items, titles := previewURLs(ctx, urls, 0, a.Log)
+	items, titles := previewURLs(ctx, urls, 0, a.Cache, a.Log)
 	for _, item := range items {
 		data.Items = append(data.Items, templateItem{Title: item.Title, Link: item.Link, Author: item.Author, FormattedDate: formatDate(item.Published)})
 	}
@@ -50,6 +41,20 @@ func (a *App) indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	data.MetaTitle, data.MetaDescription = feedMeta(urls, titles, len(data.Items))
 	render(a.Templates, w, "index.html", data, a.Log)
+}
+
+// feedURLsFromRequest extracts and normalizes the feed URLs from the "url" or
+// "urls" query param, capped at maxFeedURLs.
+func feedURLsFromRequest(r *http.Request) []string {
+	query := r.URL.Query().Get("url")
+	if query == "" {
+		query = r.URL.Query().Get("urls")
+	}
+	urls := splitAndTrim(query)
+	if len(urls) > maxFeedURLs {
+		urls = urls[:maxFeedURLs]
+	}
+	return urls
 }
 
 // feedMeta builds an og:title and og:description from the shared feed URLs,
