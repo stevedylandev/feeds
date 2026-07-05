@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <title>Feeds</title>
+    <meta name="description" content="Try out RSS feeds" />
+    <meta property="og:url" content="{{.BaseURL}}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Feeds" />
+    <meta property="og:description" content="Try out RSS feeds" />
+  </head>
+  <body>
+    <div class="header">
+      <a href="/" class="logo"><h1>FEEDS</h1></a>
+    </div>
+
+    {{if .FeedURLs}}
+    <div id="feed-urls">
+      {{range .FeedURLs}}{{.}}<br>{{end}}
+      <a href="/">edit feeds</a>
+    </div>
+
+    {{if .Error}}
+    <div id="error" class="error"><p>{{.Error}}</p></div>
+    {{else}}
+    <div id="feeds-container">
+      <div class="feeds-list">
+        {{range .Items}}
+        <article class="feed-item">
+          <div class="feed-meta"><span class="feed-date">{{.FormattedDate}}</span></div>
+          <h3 class="feed-title"><a href="{{.Link}}" target="_blank" rel="noopener noreferrer">{{.Title}}</a></h3>
+          {{if .Author}}<p class="feed-author">{{.Author}}</p>{{end}}
+        </article>
+        {{end}}
+      </div>
+    </div>
+    {{end}}
+
+    {{else}}
+    <div class="about">
+      <p>RSS lets you follow websites without algorithms or accounts. Paste a feed URL or a site address below, add a few feeds, then press Go. Your reading list lives entirely in the URL, so you can bookmark or share it.</p>
+    </div>
+
+    <div class="builder">
+      <div class="discover-row">
+        <input id="feed-input" type="url" placeholder="https://example.com or feed URL" autocomplete="off" />
+        <button id="add-button" title="Add feed">+</button>
+      </div>
+      <p id="status" class="hint hidden"></p>
+      <div id="examples" class="chips"></div>
+      <ul id="pending" class="pending-list"></ul>
+      <button id="go-button" disabled>Go</button>
+    </div>
+    <script src="/static/app.js"></script>
+    {{end}}
+  </body>
+</html>
