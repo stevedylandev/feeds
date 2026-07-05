@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -16,7 +17,12 @@ func (a *App) indexHandler(w http.ResponseWriter, r *http.Request) {
 	if query == "" {
 		query = r.URL.Query().Get("urls")
 	}
-	data := indexPageData{BaseURL: a.BaseURL}
+	data := indexPageData{
+		BaseURL:         a.BaseURL,
+		MetaTitle:       "Feeds",
+		MetaDescription: "Experience RSS feeds",
+		CanonicalURL:    a.BaseURL,
+	}
 	if query == "" {
 		render(a.Templates, w, "index.html", data, a.Log)
 		return
@@ -31,16 +37,66 @@ func (a *App) indexHandler(w http.ResponseWriter, r *http.Request) {
 		urls = urls[:maxFeedURLs]
 	}
 	data.FeedURLs = urls
+	data.CanonicalURL = a.BaseURL + r.URL.RequestURI()
 
 	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 	defer cancel()
-	for _, item := range previewURLs(ctx, urls, 0, a.Log) {
+	items, titles := previewURLs(ctx, urls, 0, a.Log)
+	for _, item := range items {
 		data.Items = append(data.Items, templateItem{Title: item.Title, Link: item.Link, Author: item.Author, FormattedDate: formatDate(item.Published)})
 	}
 	if len(data.Items) == 0 {
 		data.Error = "No items could be loaded from these feeds"
 	}
+	data.MetaTitle, data.MetaDescription = feedMeta(urls, titles, len(data.Items))
 	render(a.Templates, w, "index.html", data, a.Log)
+}
+
+// feedMeta builds an og:title and og:description from the shared feed URLs,
+// their resolved titles (falling back to the URL host), and the item count.
+func feedMeta(urls []string, titles map[string]string, itemCount int) (title, description string) {
+	names := make([]string, 0, len(urls))
+	for _, u := range urls {
+		name := titles[u]
+		if name == "" {
+			name = hostName(u)
+		}
+		if name != "" {
+			names = append(names, name)
+		}
+	}
+
+	switch {
+	case len(names) == 0:
+		title = "Feeds"
+	case len(names) == 1:
+		title = names[0]
+	default:
+		title = fmt.Sprintf("%s +%d more", names[0], len(names)-1)
+	}
+
+	feedWord := "feed"
+	if len(urls) != 1 {
+		feedWord = "feeds"
+	}
+	postWord := "post"
+	if itemCount != 1 {
+		postWord = "posts"
+	}
+	description = fmt.Sprintf("%d %s from %d %s", itemCount, postWord, len(urls), feedWord)
+	return title, description
+}
+
+// hostName returns the host of a URL with a leading "www." stripped.
+func hostName(raw string) string {
+	if !strings.Contains(raw, "://") {
+		raw = "https://" + raw
+	}
+	u, err := url.Parse(raw)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimPrefix(u.Host, "www.")
 }
 
 type resolvedFeed struct {

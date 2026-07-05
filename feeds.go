@@ -169,10 +169,11 @@ func htmlToText(src string) string {
 	return html.UnescapeString(b.String())
 }
 
-func previewURLs(ctx context.Context, urls []string, perFeed int, log *slog.Logger) []FeedPreviewItem {
+func previewURLs(ctx context.Context, urls []string, perFeed int, log *slog.Logger) ([]FeedPreviewItem, map[string]string) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	items := []FeedPreviewItem{}
+	titles := map[string]string{}
 	for _, raw := range urls {
 		feedURL := strings.TrimSpace(raw)
 		if feedURL == "" {
@@ -202,6 +203,9 @@ func previewURLs(ctx context.Context, urls []string, perFeed int, log *slog.Logg
 			}
 			mu.Lock()
 			items = append(items, local...)
+			if feedTitle != "" {
+				titles[feedURL] = feedTitle
+			}
 			mu.Unlock()
 		}()
 	}
@@ -216,7 +220,7 @@ func previewURLs(ctx context.Context, urls []string, perFeed int, log *slog.Logg
 			return 0
 		}
 	})
-	return items
+	return items, titles
 }
 
 func discoverFavicon(ctx context.Context, siteURL string) string {

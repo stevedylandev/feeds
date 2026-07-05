@@ -29,10 +29,13 @@ type templateItem struct {
 }
 
 type indexPageData struct {
-	BaseURL  string
-	Items    []templateItem
-	FeedURLs []string
-	Error    string
+	BaseURL         string
+	Items           []templateItem
+	FeedURLs        []string
+	Error           string
+	MetaTitle       string
+	MetaDescription string
+	CanonicalURL    string
 }
 
 func (a *App) routes() *http.ServeMux {
