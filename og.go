@@ -125,11 +125,6 @@ func renderOGImage(title, desc string) ([]byte, error) {
 	dc.SetHexColor("#ffffff")
 	dc.Clear()
 
-	// Top accent bar.
-	dc.SetHexColor("#1a1a1a")
-	dc.DrawRectangle(0, 0, ogWidth, 12)
-	dc.Fill()
-
 	// "FEEDS" wordmark.
 	wordmark, err := newFace(true, 34)
 	if err != nil {
