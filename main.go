@@ -11,6 +11,8 @@ import (
 )
 
 func main() {
+	loadDotEnv(".env")
+
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
 	tmpl := template.Must(template.New("").ParseFS(appFS, "templates/*.html"))
