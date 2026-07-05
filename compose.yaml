@@ -1,0 +1,11 @@
+services:
+  feeds:
+    build: .
+    image: ghcr.io/stevedylandev/feeds:latest
+    ports:
+      - "3000:3000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      BASE_URL: ${BASE_URL:-http://localhost:3000}
+    restart: unless-stopped

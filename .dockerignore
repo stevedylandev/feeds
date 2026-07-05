@@ -1,0 +1,11 @@
+.git
+.gitignore
+.env
+feeds
+Dockerfile
+compose.yaml
+.dockerignore
+README.md
+LICENSE
+.DS_Store
+**/.DS_Store
