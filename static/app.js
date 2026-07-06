@@ -5,9 +5,14 @@
 // site's /favicon.ico.
 const EXAMPLE_FEEDS = [
   {
-    title: "Bubbles",
-    url: "https://bubbles.town/feed",
-    favicon: "https://bubbles.town/static/favicon-32.png",
+    title: "NYT Top Stories",
+    url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+    favicon: "https://www.nytimes.com/favicon.ico",
+  },
+  {
+    title: "NPR",
+    url: "https://feeds.npr.org/1002/rss.xml",
+    favicon: "https://media.npr.org/chrome/favicon/favicon-180x180.png"
   },
   {
     title: "Hacker News",
@@ -15,14 +20,19 @@ const EXAMPLE_FEEDS = [
     favicon: "https://news.ycombinator.com/y18.svg",
   },
   {
-    title: "Jared Henderson",
-    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC2Kyj04yISmHr1V-UlJz4eg",
-    favicon: "https://www.youtube.com/favicon.ico",
+    title: "NASA Images",
+    url: "https://www.nasa.gov/feeds/iotd-feed/",
+    favicon: "https://www.nasa.gov/wp-content/plugins/nasa-hds-core-setup/assets/favicons/apple-touch-icon-57x57.png"
   },
   {
-    title: "NYT Top Stories",
-    url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
-    favicon: "https://www.nytimes.com/favicon.ico",
+    title: "Bubbles",
+    url: "https://bubbles.town/feed",
+    favicon: "https://bubbles.town/static/favicon-32.png",
+  },
+  {
+    title: "Jared Henderson",
+      url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC2Kyj04yISmHr1V-UlJz4eg",
+      favicon: "https://www.youtube.com/favicon.ico",
   },
 ];
 
