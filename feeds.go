@@ -107,6 +107,9 @@ func fetchFeed(ctx context.Context, feedURL, etag, lastModified string) (*FetchR
 		if title == "" {
 			title = deriveTitleFromHTML(firstNonEmpty(item.Description, item.Content))
 		}
+		if title == "" {
+			title = "Untitled post"
+		}
 		author := ""
 		if item.Author != nil {
 			author = strings.TrimSpace(item.Author.Name)
