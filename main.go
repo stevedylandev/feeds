@@ -23,7 +23,7 @@ func main() {
 		Log:       logger,
 		Templates: tmpl,
 		BaseURL:   getenv("BASE_URL", "http://localhost:3000"),
-		Cache:     newFeedCache(5 * time.Minute),
+		Cache:     newFeedCache(5*time.Minute, 512),
 		Images:    newImageCache(10*time.Minute, 512),
 		renderSem: make(chan struct{}, renderSlots),
 	}

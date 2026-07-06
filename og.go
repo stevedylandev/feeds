@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"sort"
 	"strings"
@@ -14,6 +15,10 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
+
+// errRenderBusy signals that the render semaphore was saturated and the request
+// gave up rather than piling on. Mapped to HTTP 503 by the OG handler.
+var errRenderBusy = errors.New("render busy")
 
 const (
 	ogWidth  = 1200
@@ -71,38 +76,37 @@ func (a *App) ogImageHandler(w http.ResponseWriter, r *http.Request) {
 	urls := feedURLsFromRequest(r)
 	key := ogCacheKey(urls)
 
-	// Serve a previously rendered PNG without touching the render path.
-	if png, ok := a.Images.get(key); ok {
-		writePNG(w, png)
-		return
-	}
-
 	ctx, cancel := context.WithTimeout(r.Context(), 8*time.Second)
 	defer cancel()
 
-	title, desc := "Feeds", "Experience RSS feeds"
-	if len(urls) > 0 {
-		items, titles := previewURLs(ctx, urls, 0, a.Cache, a.Log)
-		title, desc = feedMeta(urls, titles, len(items))
-	}
+	// getOrRender serves a cached PNG or, on a miss, runs the render once even
+	// under concurrent requests for the same key.
+	png, err := a.Images.getOrRender(key, func() ([]byte, error) {
+		title, desc := "Feeds", "Experience RSS feeds"
+		if len(urls) > 0 {
+			items, titles := previewURLs(ctx, urls, 0, a.Cache, a.Log)
+			title, desc = feedMeta(urls, titles, len(items))
+		}
 
-	// Bound concurrent renders to cap CPU and peak memory (each render
-	// allocates a ~3MB bitmap). Overloaded requests bail rather than pile up.
-	select {
-	case a.renderSem <- struct{}{}:
-		defer func() { <-a.renderSem }()
-	case <-ctx.Done():
+		// Bound concurrent renders to cap CPU and peak memory (each render
+		// allocates a ~3MB bitmap). Overloaded requests bail rather than pile up.
+		select {
+		case a.renderSem <- struct{}{}:
+			defer func() { <-a.renderSem }()
+		case <-ctx.Done():
+			return nil, errRenderBusy
+		}
+		return renderOGImage(title, desc)
+	})
+	switch {
+	case err == errRenderBusy:
 		http.Error(w, "render busy", http.StatusServiceUnavailable)
 		return
-	}
-
-	png, err := renderOGImage(title, desc)
-	if err != nil {
+	case err != nil:
 		a.Log.Error("og render failed", "err", err)
 		http.Error(w, "og render error", http.StatusInternalServerError)
 		return
 	}
-	a.Images.set(key, png)
 	writePNG(w, png)
 }
 
