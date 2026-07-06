@@ -34,6 +34,11 @@ const EXAMPLE_FEEDS = [
       url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC2Kyj04yISmHr1V-UlJz4eg",
       favicon: "https://www.youtube.com/favicon.ico",
   },
+  {
+    title: "Art Calendar",
+    url: "https://easel.stevedylan.dev/feed.xml",
+    favicon: "https://easel.stevedylan.dev/static/favicon.ico"
+  }
 ];
 
 function fallbackFavicon(feedURL) {
