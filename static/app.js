@@ -30,11 +30,6 @@ const EXAMPLE_FEEDS = [
     favicon: "https://bubbles.town/static/favicon-32.png",
   },
   {
-    title: "James Hoffmann",
-      url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCMb0O2CdPBNi-QqPk5T3gsQ",
-      favicon: "https://www.youtube.com/favicon.ico",
-  },
-  {
     title: "Art Calendar",
     url: "https://easel.stevedylan.dev/feed.xml",
     favicon: "https://easel.stevedylan.dev/static/favicon.ico"
