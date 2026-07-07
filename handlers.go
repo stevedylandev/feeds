@@ -12,6 +12,10 @@ import (
 
 const maxFeedURLs = 20
 
+func (a *App) privacyHandler(w http.ResponseWriter, r *http.Request) {
+	render(a.Templates, w, "privacy.html", nil, a.Log)
+}
+
 func (a *App) indexHandler(w http.ResponseWriter, r *http.Request) {
 	data := indexPageData{
 		BaseURL:         a.BaseURL,

@@ -50,6 +50,7 @@ type indexPageData struct {
 func (a *App) routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", a.indexHandler)
+	mux.HandleFunc("GET /privacy", a.privacyHandler)
 	mux.HandleFunc("GET /og.png", a.ogImageHandler)
 	mux.HandleFunc("GET /api/resolve", a.resolveHandler)
 	mux.HandleFunc("GET /static/", embeddedHandler(appFS, "static"))
