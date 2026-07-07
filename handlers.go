@@ -20,7 +20,7 @@ func (a *App) indexHandler(w http.ResponseWriter, r *http.Request) {
 	data := indexPageData{
 		BaseURL:         a.BaseURL,
 		MetaTitle:       "Feeds",
-		MetaDescription: "Experience RSS feeds",
+		MetaDescription: "An introduction to RSS",
 		CanonicalURL:    a.BaseURL,
 		OGImage:         a.BaseURL + "/static/og.png",
 	}
