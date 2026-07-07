@@ -30,8 +30,8 @@ const EXAMPLE_FEEDS = [
     favicon: "https://bubbles.town/static/favicon-32.png",
   },
   {
-    title: "Jared Henderson",
-      url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC2Kyj04yISmHr1V-UlJz4eg",
+    title: "James Hoffmann",
+      url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCMb0O2CdPBNi-QqPk5T3gsQ",
       favicon: "https://www.youtube.com/favicon.ico",
   },
   {
