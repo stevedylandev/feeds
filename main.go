@@ -30,7 +30,16 @@ func main() {
 
 	addr := getenv("HOST", "0.0.0.0") + ":" + getenv("PORT", "3000")
 	logger.Info("feeds server running", "addr", addr)
-	if err := http.ListenAndServe(addr, app.routes()); err != nil {
+	srv := &http.Server{
+		Addr:              addr,
+		Handler:           limitInFlight(app.routes(), 300),
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    1 << 16,
+	}
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }

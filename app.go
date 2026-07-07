@@ -57,6 +57,27 @@ func (a *App) routes() *http.ServeMux {
 	return mux
 }
 
+// limitInFlight caps concurrent in-flight requests. Under a traffic spike,
+// excess requests get an immediate 503 rather than piling up goroutines and
+// outbound connections that would exhaust file descriptors. Static asset
+// requests are cheap (served from memory) and bypass the limiter.
+func limitInFlight(next http.Handler, max int) http.Handler {
+	sem := make(chan struct{}, max)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/static/") {
+			next.ServeHTTP(w, r)
+			return
+		}
+		select {
+		case sem <- struct{}{}:
+			defer func() { <-sem }()
+			next.ServeHTTP(w, r)
+		default:
+			http.Error(w, "server busy", http.StatusServiceUnavailable)
+		}
+	})
+}
+
 // embeddedHandler serves files from an embed.FS under the given URL prefix.
 func embeddedHandler(fs embed.FS, prefix string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

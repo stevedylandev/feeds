@@ -44,8 +44,28 @@ type FeedPreviewItem struct {
 
 const appUserAgent = "feeds/0.1 (+https://github.com/stevedylandev/feeds)"
 
+// fetchSem bounds total concurrent outbound HTTP requests across every handler.
+// A single page can reference maxFeedURLs feeds (each a separate fetch), and
+// that fan-out times concurrent viral traffic would otherwise open unbounded
+// sockets and goroutines. Sized well above renderSem because fetches are
+// IO-bound; excess fetches queue until a slot frees or their context expires.
+var fetchSem = make(chan struct{}, 64)
+
+// acquireFetch takes an outbound-fetch slot, honoring context cancellation so a
+// request that gives up doesn't keep waiting for a slot it no longer needs.
+func acquireFetch(ctx context.Context) error {
+	select {
+	case fetchSem <- struct{}{}:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func releaseFetch() { <-fetchSem }
+
 func buildHTTPClient() *http.Client {
-	return &http.Client{Timeout: 15 * time.Second}
+	return &http.Client{Timeout: 10 * time.Second}
 }
 
 func newRequest(ctx context.Context, method, rawURL string) (*http.Request, error) {
@@ -69,6 +89,10 @@ func fetchFeed(ctx context.Context, feedURL, etag, lastModified string) (*FetchR
 	if lastModified != "" {
 		req.Header.Set("If-Modified-Since", lastModified)
 	}
+	if err := acquireFetch(ctx); err != nil {
+		return nil, err
+	}
+	defer releaseFetch()
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("fetch failed: %w", err)
@@ -236,6 +260,10 @@ func discoverFavicon(ctx context.Context, siteURL string) string {
 	if err != nil {
 		return ""
 	}
+	if err := acquireFetch(ctx); err != nil {
+		return ""
+	}
+	defer releaseFetch()
 	resp, err := client.Do(req)
 	if err == nil {
 		defer resp.Body.Close()
@@ -304,17 +332,24 @@ func discoverFeeds(ctx context.Context, baseURL string) ([]string, error) {
 		}
 	}
 	for _, page := range scanPages {
-		req, err := newRequest(ctx, http.MethodGet, page)
-		if err != nil {
-			continue
-		}
-		resp, err := client.Do(req)
-		if err != nil {
-			continue
-		}
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
-		_ = resp.Body.Close()
-		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, status := func() ([]byte, int) {
+			req, err := newRequest(ctx, http.MethodGet, page)
+			if err != nil {
+				return nil, 0
+			}
+			if err := acquireFetch(ctx); err != nil {
+				return nil, 0
+			}
+			defer releaseFetch()
+			resp, err := client.Do(req)
+			if err != nil {
+				return nil, 0
+			}
+			defer resp.Body.Close()
+			b, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+			return b, resp.StatusCode
+		}()
+		if status < 200 || status >= 300 {
 			continue
 		}
 		for _, href := range findAlternateFeedLinks(string(body)) {
