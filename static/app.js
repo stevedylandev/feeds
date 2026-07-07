@@ -30,6 +30,11 @@ const EXAMPLE_FEEDS = [
     favicon: "https://bubbles.town/static/favicon-32.png",
   },
   {
+    title: "Robert Birming",
+    url: "https://robertbirming.com/feed/",
+    favicon: "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E:-)%3C/text%3E%3C/svg%3E"
+  },
+  {
     title: "Art Calendar",
     url: "https://easel.stevedylan.dev/feed.xml",
     favicon: "https://easel.stevedylan.dev/static/favicon.ico"
