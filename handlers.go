@@ -26,7 +26,6 @@ func (a *App) indexHandler(w http.ResponseWriter, r *http.Request) {
 		render(a.Templates, w, "index.html", data, a.Log)
 		return
 	}
-	data.FeedURLs = urls
 	data.CanonicalURL = a.BaseURL + r.URL.RequestURI()
 	data.OGImage = a.BaseURL + "/og.png?" + r.URL.RawQuery
 
@@ -38,6 +37,13 @@ func (a *App) indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(data.Items) == 0 {
 		data.Error = "No items could be loaded from these feeds"
+	}
+	for _, u := range urls {
+		name := titles[u]
+		if name == "" {
+			name = hostName(u)
+		}
+		data.FeedURLs = append(data.FeedURLs, feedRef{Name: name, URL: u})
 	}
 	data.MetaTitle, data.MetaDescription = feedMeta(urls, titles, len(data.Items))
 	render(a.Templates, w, "index.html", data, a.Log)

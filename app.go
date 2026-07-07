@@ -31,10 +31,15 @@ type templateItem struct {
 	FormattedDate string
 }
 
+type feedRef struct {
+	Name string
+	URL  string
+}
+
 type indexPageData struct {
 	BaseURL         string
 	Items           []templateItem
-	FeedURLs        []string
+	FeedURLs        []feedRef
 	Error           string
 	MetaTitle       string
 	MetaDescription string
