@@ -5,14 +5,19 @@
 // site's /favicon.ico.
 const EXAMPLE_FEEDS = [
   {
-    title: "NYT Top Stories",
-    url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
-    favicon: "https://www.nytimes.com/favicon.ico",
+    title: "Kagi News",
+    url: "https://news.kagi.com/world.xml",
+    favicon: "https://news.kagi.com/favicon.svg",
   },
   {
     title: "NPR",
     url: "https://feeds.npr.org/1002/rss.xml",
     favicon: "https://media.npr.org/chrome/favicon/favicon-180x180.png"
+  },
+  {
+    title: "Quanta",
+    url: "https://www.quantamagazine.org/feed/",
+    favicon: "https://www.quantamagazine.org/wp-content/themes/quanta2024/frontend/images/favicon.png"
   },
   {
     title: "Hacker News",
@@ -23,6 +28,11 @@ const EXAMPLE_FEEDS = [
     title: "NASA Images",
     url: "https://www.nasa.gov/feeds/iotd-feed/",
     favicon: "https://www.nasa.gov/wp-content/plugins/nasa-hds-core-setup/assets/favicons/apple-touch-icon-57x57.png"
+  },
+  {
+    title: "Colossal",
+    url: "https://www.thisiscolossal.com/feed/",
+    favicon: "https://www.thisiscolossal.com/wp-content/uploads/2024/08/icon-crow-150x150.png"
   },
   {
     title: "Bubbles",
