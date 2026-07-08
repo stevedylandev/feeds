@@ -120,14 +120,14 @@ func fetchFeed(ctx context.Context, feedURL, etag, lastModified string) (*FetchR
 	if err != nil {
 		return nil, fmt.Errorf("feed parse failed: %w", err)
 	}
-	result.Title = strings.TrimSpace(feed.Title)
+	result.Title = strings.TrimSpace(html.UnescapeString(feed.Title))
 	result.SiteURL = firstNonEmpty(feed.Link, firstFeedAltLink(feed))
 	for _, item := range feed.Items {
 		link := strings.TrimSpace(item.Link)
 		if link == "" {
 			continue
 		}
-		title := strings.TrimSpace(item.Title)
+		title := strings.TrimSpace(html.UnescapeString(item.Title))
 		if title == "" {
 			title = deriveTitleFromHTML(firstNonEmpty(item.Description, item.Content))
 		}
@@ -136,7 +136,7 @@ func fetchFeed(ctx context.Context, feedURL, etag, lastModified string) (*FetchR
 		}
 		author := ""
 		if item.Author != nil {
-			author = strings.TrimSpace(item.Author.Name)
+			author = strings.TrimSpace(html.UnescapeString(item.Author.Name))
 		}
 		guid := strings.TrimSpace(item.GUID)
 		if guid == "" {
